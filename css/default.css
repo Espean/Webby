@@ -1,0 +1,52 @@
+/* Add your default styles here, like font, color scheme, etc., which apply to all pages */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f9fd;
+}
+
+/* Common header style */
+header {
+    background-color: #7b8dab;
+    padding: 10px;
+    text-align: center;
+    position: relative; /* For absolute positioning of burger menu */
+}
+
+/* Burger menu */
+.burger-menu {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+/* Common navigation style */
+nav {
+    display: none; /* Initially hidden, shown when burger menu is clicked */
+    position: absolute;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    width: 100%;
+    top: 100%;
+    left: 0;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: #333;
+    border-bottom: 1px solid #ddd;
+}
+
+nav ul li a:hover {
+    background-color: #f0f0f0;
+}
