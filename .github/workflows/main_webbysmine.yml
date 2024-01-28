@@ -28,9 +28,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip setuptools wheel
 
+      - name: Install Cython
+        run: pip install Cython
+
       - name: Install numpy separately
-        run: |
-          pip install numpy
+        run: pip install numpy
 
       - name: Install dependencies
         run: pip install --no-use-pep517 -r requirements.txt
