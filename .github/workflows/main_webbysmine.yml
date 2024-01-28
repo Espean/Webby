@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: '3.9.6'
 
@@ -24,15 +24,12 @@ jobs:
           python -m venv venv
           source venv/bin/activate
 
-      - name: Upgrade pip and setuptools
+      - name: Upgrade pip, setuptools, and wheel
         run: |
           python -m pip install --upgrade pip setuptools wheel
 
       - name: Install Cython
         run: pip install Cython
-
-      - name: Install numpy separately
-        run: pip install numpy
 
       - name: Install dependencies
         run: pip install --no-use-pep517 -r requirements.txt
