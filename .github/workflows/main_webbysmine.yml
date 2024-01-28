@@ -1,67 +1,37 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-# More info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
+deploy:
+  runs-on: ubuntu-latest
+  needs: build
+  environment:
+    name: 'Production'
+    url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
-name: Build and deploy Python app to Azure Web App - webbysmine
+  steps:
+    - name: Download artifact from build job
+      uses: actions/download-artifact@v3
+      with:
+        name: python-app
 
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+    - name: Unzip artifact for deployment
+      run: unzip release.zip
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+    # Debug: List files to see the structure
+    - name: List files in artifact
+      run: ls -R
 
-    steps:
-      - uses: actions/checkout@v4
+    # Default deployment step (try this first)
+    - name: 'Deploy to Azure Web App'
+      uses: azure/webapps-deploy@v2
+      id: deploy-to-webapp
+      with:
+        app-name: 'webbysmine'
+        slot-name: 'Production'
+        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_590EA66CF1694FE4868B6294F6461D35 }}
 
-      - name: Set up Python version
-        uses: actions/setup-python@v1
-        with:
-          python-version: '3.12'
-
-      - name: Create and start virtual environment
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-
-      #- name: Install dependencies
-       # run: pip install -r requirements.txt
-
-      # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
-      - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
-
-      - name: Upload artifact for deployment jobs
-        uses: actions/upload-artifact@v3
-        with:
-          name: python-app
-          path: |
-            release.zip
-            !venv/
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v3
-        with:
-          name: python-app
-
-      - name: Unzip artifact for deployment
-        run: unzip release.zip
-
-      - name: 'Deploy to Azure Web App'
-        uses: azure/webapps-deploy@v2
-        id: deploy-to-webapp
-        with:
-          app-name: 'webbysmine'
-          slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_590EA66CF1694FE4868B6294F6461D35 }}
+    # Optional: Manual deployment using Kudu Zip Deploy (if the above step doesn't place files in wwwroot)
+    - name: Manual Deployment using Kudu Zip Deploy
+      if: failure() # Only run if the previous step failed
+      run: |
+        curl -X POST -u $AZURE_USERNAME:$AZURE_PASSWORD --data-binary @release.zip https://webbysmine.scm.azurewebsites.net/api/zipdeploy
+      env:
+        AZURE_USERNAME: ${{ secrets.AZURE_USERNAME }}
+        AZURE_PASSWORD: ${{ secrets.AZURE_PASSWORD }}
