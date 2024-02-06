@@ -1,15 +1,13 @@
 {
-  "name": "wbby",
+  "name": "mywebbsi",
   "version": "1.0.0",
-  "description": "my project",
+  "description": "Your App Description",
   "main": "index.js",
   "scripts": {
-    "test": ""
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "webby"
-  },
-  "author": "",
-  "license": "ISC"
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
