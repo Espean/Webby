@@ -10,8 +10,8 @@ module.exports = async function (context) {
     const credential = new DefaultAzureCredential();
     const client = new SecretClient(KVUri, credential);
 
-    const githubToken = await client.getSecret("GitHubToken");
-    const storageConnectionString = await client.getSecret("StorageConnectionString");
+    const githubToken = await client.getSecret("gittoken");
+    const storageConnectionString = await client.getSecret("saconnstring1");
 
     // Setup GitHub client
     const octokit = new Octokit({ auth: githubToken.value });
