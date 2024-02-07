@@ -8,6 +8,10 @@
     "test": ""
   },
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "@azure/identity": "^1.5.2",
+    "@azure/keyvault-secrets": "^4.3.0",
+    "@azure/storage-blob": "^12.8.0",
+    "@octokit/rest": "^18.10.0"
   }
 }
