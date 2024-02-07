@@ -1,0 +1,16 @@
+{
+  "name": "azure-functions-github-blob",
+  "version": "1.0.0",
+  "description": "Azure Function to fetch GitHub repo content, combine it, and upload to Blob Storage",
+  "main": "index.js",
+  "scripts": {
+    "start": "func start",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "dependencies": {
+    "@azure/identity": "^1.5.2",
+    "@azure/keyvault-secrets": "^4.3.0",
+    "@azure/storage-blob": "^12.8.0",
+    "@octokit/rest": "^18.10.0"
+  }
+}
