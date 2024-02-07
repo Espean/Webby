@@ -1,8 +1,14 @@
-const { DefaultAzureCredential } = require('@azure/identity');
+const { DefaultAzureCredential, DefaultAzureCredentialOptions } = require('@azure/identity');
 const { SecretClient } = require('@azure/keyvault-secrets');
 const { BlobServiceClient } = require('@azure/storage-blob');
 const { Octokit } = require("@octokit/rest");
 
+// Specify the tenant ID
+const options = new DefaultAzureCredentialOptions();
+options.managedIdentityClientId = process.env["AZURE_CLIENT_ID"]; // If using user-assigned managed identity
+options.tenantId = process.env["AZURE_TENANT_ID"]; // Specify tenant ID here
+
+const credential = new DefaultAzureCredential(options);
 module.exports = async function (context) {
     const keyVaultName = process.env["webbykv"];
     const KVUri = "https://" + keyVaultName + ".vault.azure.net";
