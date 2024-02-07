@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "func start",
-    "test": "echo \"No tests specified\" && exit 0"
+    "test": ""
   },
   "dependencies": {
     "@azure/identity": "^1.5.2",
