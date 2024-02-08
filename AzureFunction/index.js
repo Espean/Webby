@@ -20,26 +20,8 @@ module.exports = async function (context) {
         // Setup GitHub client
         const octokit = new Octokit({ auth: githubToken.value });
 
-        // Fetch files from GitHub repo (insert your repo details)
-        const { data } = await octokit.repos.getContent({
-            owner: "Espean",
-            repo: "Webby",
-            path: "" // root directory
-        });
-
-        // Combine file contents (simplified example, handle directories recursively)
-        let combinedContent = "";
-        for (const file of data) {
-            if (file.type === 'file') {
-                const fileData = await octokit.repos.getContent({
-                    owner: "Espean",
-                    repo: "Webby",
-                    path: file.path
-                });
-                const content = Buffer.from(fileData.data.content, 'base64').toString('utf-8');
-                combinedContent += content + "\n";
-            }
-        }
+        // Fetch files from GitHub repo recursively
+        const combinedContent = await fetchFilesRecursively(octokit, "Espean", "Webby");
 
         // Upload to Azure Blob Storage
         const blobServiceClient = BlobServiceClient.fromConnectionString(storageConnectionString.value);
@@ -59,3 +41,28 @@ module.exports = async function (context) {
         };
     }
 };
+
+async function fetchFilesRecursively(octokit, owner, repo, path = '') {
+    const { data } = await octokit.repos.getContent({
+        owner,
+        repo,
+        path
+    });
+
+    let combinedContent = "";
+    for (const file of data) {
+        if (file.type === 'file') {
+            const fileData = await octokit.repos.getContent({
+                owner,
+                repo,
+                path: file.path
+            });
+            const content = Buffer.from(fileData.data.content, 'base64').toString('utf-8');
+            combinedContent += content + "\n";
+        } else if (file.type === 'dir') {
+            const subdirectoryContent = await fetchFilesRecursively(octokit, owner, repo, file.path);
+            combinedContent += subdirectoryContent;
+        }
+    }
+    return combinedContent;
+}
