@@ -1,4 +1,4 @@
-const { DefaultAzureCredential } = require('@azure/identity');
+const { ClientSecretCredential } = require('@azure/identity');
 const { SecretClient } = require('@azure/keyvault-secrets');
 
 module.exports = async function (context, req) {
@@ -6,11 +6,13 @@ module.exports = async function (context, req) {
     const KVUri = "https://" + keyVaultName + ".vault.azure.net/";
     const secretName = "gittoken"; // Replace with your actual secret name
 
-    // Attempt to explicitly specify the tenant ID for diagnostic purposes
-    const tenantId = process.env["AZURE_TENANT_ID"]; // Ensure this is set in your Function App settings if attempting to use
+    // Retrieve the values for your service principal from your Function App settings
+    const tenantId = process.env["AZURE_TENANT_ID"];
+    const clientId = process.env["AZURE_CLIENT_ID"];
+    const clientSecret = process.env["AZURE_CLIENT_SECRET"];
 
-    const credentialOptions = tenantId ? { tenantId } : {};
-    const credential = new DefaultAzureCredential(credentialOptions);
+    // Create the service principal credential
+    const credential = new ClientSecretCredential(tenantId, clientId, clientSecret);
 
     try {
         const client = new SecretClient(KVUri, credential);
@@ -18,7 +20,7 @@ module.exports = async function (context, req) {
 
         context.res = {
             // status: 200, /* Defaults to 200 */
-            body: `Secret Value: ${secret.value}\nUsing tenant: ${tenantId}`
+            body: `Secret Value: ${secret.value}`
         };
     } catch (error) {
         context.log.error(`Error: ${error.message}`);
