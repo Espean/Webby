@@ -21,13 +21,17 @@ module.exports = async function (context) {
         const octokit = new Octokit({ auth: githubToken.value });
 
         // Fetch files from GitHub repo recursively
-        const combinedContent = await fetchFilesRecursively(octokit, "Espean", "Webby");
+        const { combinedContent, fileStructure } = await fetchFilesRecursively(octokit, "Espean", "Webby");
 
-        // Upload to Azure Blob Storage
+        // Upload combined content to Azure Blob Storage
         const blobServiceClient = BlobServiceClient.fromConnectionString(storageConnectionString.value);
         const containerClient = blobServiceClient.getContainerClient("webbycode");
         const blockBlobClient = containerClient.getBlockBlobClient("combinedFiles.txt");
         await blockBlobClient.upload(combinedContent, combinedContent.length);
+
+        // Upload file structure to Azure Blob Storage
+        const fileStructureBlockBlobClient = containerClient.getBlockBlobClient("fileStructure.json");
+        await fileStructureBlockBlobClient.upload(JSON.stringify(fileStructure), JSON.stringify(fileStructure).length);
 
         context.res = {
             status: 200,
@@ -50,6 +54,8 @@ async function fetchFilesRecursively(octokit, owner, repo, path = '') {
     });
 
     let combinedContent = "";
+    let fileStructure = { type: 'folder', name: path, children: [] };
+
     for (const file of data) {
         if (file.type === 'file') {
             const fileData = await octokit.repos.getContent({
@@ -58,11 +64,17 @@ async function fetchFilesRecursively(octokit, owner, repo, path = '') {
                 path: file.path
             });
             const content = Buffer.from(fileData.data.content, 'base64').toString('utf-8');
-            combinedContent += content + "\n";
+            const filePath = `${path}/${file.name}`;
+            combinedContent += `// This is file in path ${filePath}\n${content}\n\n`;
+            fileStructure.children.push({ type: 'file', name: file.name, path: filePath });
         } else if (file.type === 'dir') {
-            const subdirectoryContent = await fetchFilesRecursively(octokit, owner, repo, file.path);
-            combinedContent += subdirectoryContent;
+            const subdirectoryResult = await fetchFilesRecursively(octokit, owner, repo, file.path);
+            const directoryPath = `${path}/${file.name}`;
+            combinedContent += `// This is directory in path ${directoryPath}\n\n`;
+            combinedContent += subdirectoryResult.combinedContent;
+            fileStructure.children.push({ type: 'folder', name: file.name, path: directoryPath, children: subdirectoryResult.fileStructure });
         }
     }
-    return combinedContent;
+
+    return { combinedContent, fileStructure };
 }
