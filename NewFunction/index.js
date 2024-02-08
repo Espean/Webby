@@ -2,9 +2,9 @@ const { DefaultAzureCredential } = require('@azure/identity');
 const { SecretClient } = require('@azure/keyvault-secrets');
 
 module.exports = async function (context, req) {
-    const keyVaultName = process.env["KEY_VAULT_NAME"];
+    const keyVaultName = process.env["webbykv"];
     const KVUri = "https://" + keyVaultName + ".vault.azure.net";
-    const secretName = "YourSecretName"; // Replace with your actual secret name
+    const secretName = "gittoken"; // Replace with your actual secret name
 
     const credential = new DefaultAzureCredential();
     const client = new SecretClient(KVUri, credential);
