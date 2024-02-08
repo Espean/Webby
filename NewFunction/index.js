@@ -2,28 +2,29 @@ const { DefaultAzureCredential } = require('@azure/identity');
 const { SecretClient } = require('@azure/keyvault-secrets');
 
 module.exports = async function (context, req) {
-    const keyVaultName = process.env["webbykv"];
-    const KVUri = "https://" + keyVaultName + ".vault.azure.net";
+    const keyVaultName = process.env["webbykv"]; // Ensure this environment variable is set in your Function App settings
+    const KVUri = "https://" + keyVaultName + ".vault.azure.net/";
     const secretName = "gittoken"; // Replace with your actual secret name
 
-    const credential = new DefaultAzureCredential();
-    const client = new SecretClient(KVUri, credential);
+    // Attempt to explicitly specify the tenant ID for diagnostic purposes
+    const tenantId = process.env["AZURE_TENANT_ID"]; // Ensure this is set in your Function App settings if attempting to use
+
+    const credentialOptions = tenantId ? { tenantId } : {};
+    const credential = new DefaultAzureCredential(credentialOptions);
 
     try {
-        // Retrieve the secret value from Key Vault
+        const client = new SecretClient(KVUri, credential);
         const secret = await client.getSecret(secretName);
-        
-        // Attempt to print the tenant ID (this part is not straightforward with Managed Identity as it doesn't expose tenant ID directly)
-        // Instead, we're demonstrating the concept by accessing the secret successfully
+
         context.res = {
-            status: 200,
-            body: `Secret Value: ${secret.value}\n`
+            // status: 200, /* Defaults to 200 */
+            body: `Secret Value: ${secret.value}\nUsing tenant: ${tenantId}`
         };
     } catch (error) {
         context.log.error(`Error: ${error.message}`);
         context.res = {
             status: 500,
-            body: "Failed to retrieve secret from Key Vault."
+            body: `Failed to retrieve secret from Key Vault. Error: ${error.message}`
         };
     }
 };
