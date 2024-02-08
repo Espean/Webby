@@ -39,7 +39,6 @@ async function fetchFilesRecursively(octokit, owner, repo, path = '') {
         return { data: [] }; // Return empty to allow continuation
     });
 
-    // Implement pagination handling if applicable
     for (const file of data) {
         if (file.type === 'file') {
             const fileData = await octokit.repos.getContent({
@@ -48,7 +47,7 @@ async function fetchFilesRecursively(octokit, owner, repo, path = '') {
                 path: file.path
             }).catch(error => {
                 console.error(`Error fetching file: ${file.path}`, error);
-                return null;
+                return null; // Skip this file if error occurs
             });
             if (fileData) {
                 const content = Buffer.from(fileData.data.content, 'base64').toString('utf-8');
@@ -57,6 +56,7 @@ async function fetchFilesRecursively(octokit, owner, repo, path = '') {
             }
         } else if (file.type === 'dir') {
             const subdirectoryResult = await fetchFilesRecursively(octokit, owner, repo, file.path);
+            combinedContent += subdirectoryResult.combinedContent; // Append content from subdirectories
             fileStructure.children.push({ ...subdirectoryResult.fileStructure, name: file.name, path: file.path });
         }
     }
