@@ -1,12 +1,8 @@
 name: Invoke Azure Function on Push
-
-on:
-  workflow_dispatch:
-
+on: [push]
 jobs:
-  trigger:
+  build:
     runs-on: ubuntu-latest
-    needs: [main_webbyapi, main_mywebbsi]
     steps:
     - name: Invoke Azure Function
       run: curl -d "" -X POST ${{ secrets.AZSADATA }}
