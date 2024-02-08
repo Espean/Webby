@@ -23,15 +23,14 @@ module.exports = async function (context) {
         // Fetch files from GitHub repo recursively
         const { combinedContent, fileStructure } = await fetchFilesRecursively(octokit, "Espean", "Webby");
 
-        // Upload combined content to Azure Blob Storage
+        // Create combined content with folder structure at the top
+        const combinedWithStructure = JSON.stringify(fileStructure) + '\n\n' + combinedContent;
+
+        // Upload combined content with folder structure to Azure Blob Storage
         const blobServiceClient = BlobServiceClient.fromConnectionString(storageConnectionString.value);
         const containerClient = blobServiceClient.getContainerClient("webbycode");
         const blockBlobClient = containerClient.getBlockBlobClient("combinedFiles.txt");
-        await blockBlobClient.upload(combinedContent, combinedContent.length);
-
-        // Upload file structure to Azure Blob Storage
-        const fileStructureBlockBlobClient = containerClient.getBlockBlobClient("fileStructure.json");
-        await fileStructureBlockBlobClient.upload(JSON.stringify(fileStructure), JSON.stringify(fileStructure).length);
+        await blockBlobClient.upload(combinedWithStructure, combinedWithStructure.length);
 
         context.res = {
             status: 200,
@@ -70,8 +69,6 @@ async function fetchFilesRecursively(octokit, owner, repo, path = '') {
         } else if (file.type === 'dir') {
             const subdirectoryResult = await fetchFilesRecursively(octokit, owner, repo, file.path);
             const directoryPath = `${path}/${file.name}`;
-            combinedContent += `// This is directory in path ${directoryPath}\n\n`;
-            combinedContent += subdirectoryResult.combinedContent;
             fileStructure.children.push({ type: 'folder', name: file.name, path: directoryPath, children: subdirectoryResult.fileStructure });
         }
     }
