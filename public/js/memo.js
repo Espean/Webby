@@ -1,57 +1,67 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const submitButton = document.getElementById('submit');
     const memoInput = document.getElementById('memoInput');
     const memoList = document.getElementById('memoList');
 
-    // Function to create a memo entry
-    function createMemoEntry(text, timestamp) {
-        const memoEntry = document.createElement('div');
-        memoEntry.className = 'memoEntry';
-        const timestampSpan = document.createElement('span');
-        timestampSpan.className = 'memoTimestamp';
-        timestampSpan.textContent = timestamp;
-        memoEntry.textContent = text;
-        memoEntry.appendChild(timestampSpan);
-        memoList.appendChild(memoEntry);
-    }
-    // Function to create a memo entry
-function createMemoEntry(text, timestamp) {
-    const memoEntry = document.createElement('div');
-    memoEntry.className = 'memoEntry';
-    const memoText = document.createElement('p');
-    memoText.className = 'memoText'; // Add this line
-    memoText.textContent = text;
+    // Load memos on page load
+    loadMemos();
 
-    const timestampSpan = document.createElement('span');
-    timestampSpan.className = 'memoTimestamp';
-    timestampSpan.textContent = timestamp;
-
-    memoEntry.appendChild(timestampSpan);
-    memoEntry.appendChild(memoText); // Append the text below the timestamp
-    memoList.appendChild(memoEntry);
-}
-    // Load existing memos from localStorage
-    function loadMemos() {
-        const memos = JSON.parse(localStorage.getItem('memos')) || [];
-        memos.forEach(memo => {
-            createMemoEntry(memo.text, memo.timestamp);
-        });
-    }
-
-    loadMemos(); // Load memos when the page is loaded
-
-    submitButton.addEventListener('click', function () {
+    // Submit button event listener
+    document.getElementById('submit').addEventListener('click', function () {
         const memoText = memoInput.value.trim();
-        const timestamp = new Date().toLocaleString(); // Get the current timestamp
         if (memoText) {
-            createMemoEntry(memoText, timestamp);
-
-            // Save the new memo to localStorage
-            const memos = JSON.parse(localStorage.getItem('memos')) || [];
-            memos.push({ text: memoText, timestamp: timestamp });
-            localStorage.setItem('memos', JSON.stringify(memos));
-
-            memoInput.value = ''; // Clear the input
+            createOrUpdateMemo({ text: memoText });
+            memoInput.value = ''; // Clear the input after submission
         }
     });
+
+    async function loadMemos() {
+        const response = await fetch('/api/memo');
+        const memos = await response.json();
+        memoList.innerHTML = ''; // Clear existing memos before loading
+        memos.forEach(memo => createMemoEntry(memo));
+    }
+
+    async function createOrUpdateMemo(memo, isUpdate = false) {
+        const method = isUpdate ? 'PUT' : 'POST';
+        await fetch(`/api/memo${isUpdate ? '/' + memo.id : ''}`, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: memo.text })
+        });
+        loadMemos(); // Reload memos to reflect changes
+    }
+
+    async function deleteMemo(id) {
+        await fetch(`/api/memo/${id}`, { method: 'DELETE' });
+        loadMemos(); // Reload memos to reflect changes
+    }
+
+    function createMemoEntry(memo) {
+        const memoEntry = document.createElement('div');
+        memoEntry.className = 'memoEntry';
+
+        const memoText = document.createElement('p');
+        memoText.className = 'memoText';
+        memoText.textContent = memo.text;
+        memoEntry.appendChild(memoText);
+
+        // Edit button
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.onclick = () => {
+            const newText = prompt('Edit memo:', memo.text);
+            if (newText) {
+                createOrUpdateMemo({ ...memo, text: newText }, true);
+            }
+        };
+        memoEntry.appendChild(editButton);
+
+        // Delete button
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.onclick = () => deleteMemo(memo.id);
+        memoEntry.appendChild(deleteButton);
+
+        memoList.appendChild(memoEntry);
+    }
 });
