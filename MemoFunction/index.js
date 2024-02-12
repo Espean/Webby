@@ -45,7 +45,7 @@ async function getMemos(context, req) {
         context.log(`Total memos fetched: ${memos.length}`); // Log total number of memos
         context.res = {
             status: memos.length > 0 ? 200 : 204,
-            body: memos.length > 0 ? memos : "No memos found.",
+            body: memos.length > 0 ? memos : [],
             headers: {
                 'Content-Type': 'application/json'
             }
