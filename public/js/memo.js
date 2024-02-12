@@ -19,8 +19,10 @@ document.addEventListener('DOMContentLoaded', function () {
     async function loadMemos() {
         try {
             const response = await fetch(apiUrl);
+            // Ensure the response is not empty before attempting to parse it as JSON
             if (!response.ok) throw new Error('Failed to fetch memos');
-            const memos = await response.json();
+            const text = await response.text(); // Get response body as text
+            const memos = text ? JSON.parse(text) : []; // Parse text as JSON or use empty array if text is empty
             memoList.innerHTML = ''; // Clear existing memos before loading new ones
             memos.forEach(memo => createMemoEntry(memo));
         } catch (error) {
