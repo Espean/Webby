@@ -45,10 +45,11 @@ async function getMemos(context, req) {
 async function createOrUpdateMemo(context, req, isUpdate = false) {
     const id = req.params.id || new Date().getTime().toString(); // Use timestamp as ID if not provided
     const content = req.body;
-    const blobClient = containerClient.getBlobClient(id + ".json");
-    await blobClient.upload(content, content.length, { overwrite: isUpdate });
+    const blockBlobClient = containerClient.getBlockBlobClient(id + ".json");
+    await blockBlobClient.upload(Buffer.from(content), Buffer.byteLength(content), { overwrite: isUpdate });
     context.res = { status: 200, body: { message: "Memo saved successfully.", id: id } };
 }
+
 
 async function deleteMemo(context, req) {
     if (!req.params.id) {
