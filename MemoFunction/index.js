@@ -50,11 +50,20 @@ async function getMemos(context, req) {
 
 async function createOrUpdateMemo(context, req, isUpdate = false) {
     const id = req.params.id || new Date().getTime().toString(); // Use timestamp as ID if not provided
-    const content = req.body;
-    const contentString = JSON.stringify(content); // Correctly stringify the content object
-    const blockBlobClient = containerClient.getBlockBlobClient(id + ".json");
+    let content = req.body;
+
+    // If creating a new memo, add the timestamp server-side for consistency
+    if (!isUpdate) {
+        content = {
+            ...content,
+            timestamp: new Date().toISOString() // Add timestamp
+        };
+    }
+
+    const contentString = JSON.stringify(content); // Correctly stringify the content object with timestamp
+    const blockBlobClient = containerClient.getBlockBlobClient(`${id}.json`);
     await blockBlobClient.upload(Buffer.from(contentString), Buffer.byteLength(contentString), { overwrite: isUpdate });
-    context.res = { status: 200, body: { message: "Memo saved successfully.", id: id } };
+    context.res = { status: 200, body: { message: "Memo saved successfully.", id } };
 }
 
 async function deleteMemo(context, req) {
