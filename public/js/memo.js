@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
 async function loadMemos() {
     try {
         const response = await fetch(apiUrl);
+        console.log(response.status); // Log status code
         if (response.ok) {
             const text = await response.text();
             const memos = text ? JSON.parse(text) : [];
