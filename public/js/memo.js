@@ -10,32 +10,30 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('submit').addEventListener('click', function () {
         const memoText = memoInput.value.trim();
         if (memoText) {
-            // Assuming new memos don't have an ID until saved
             createOrUpdateMemo({ text: memoText });
             memoInput.value = ''; // Clear the input after submission
         }
     });
 
-async function loadMemos() {
-    try {
-        const response = await fetch(apiUrl);
-        if (response.ok) {
-            // Check if the response has content before parsing it
-            const text = await response.text();
-            const memos = text ? JSON.parse(text) : [];
-            memoList.innerHTML = ''; // Clear existing memos before loading new ones
-            memos.forEach(memo => createMemoEntry(memo));
-        } else if (response.status === 204) {
-            console.log('No memos to load.');
-            // Handle no content scenario
-        } else {
-            throw new Error(`Failed to fetch memos, status: ${response.status}`);
+    async function loadMemos() {
+        try {
+            const response = await fetch(apiUrl);
+            if (response.ok) {
+                const text = await response.text();
+                const memos = text ? JSON.parse(text) : [];
+                memoList.innerHTML = ''; // Clear existing memos before loading new ones
+                memos.forEach(memo => createMemoEntry(memo));
+            } else if (response.status === 204) {
+                console.log('No memos to load.');
+                memoList.innerHTML = '<p>No memos found. Add some memos!</p>'; // Inform the user
+            } else {
+                throw new Error(`Failed to fetch memos, status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Error loading memos:', error);
+            memoList.innerHTML = '<p>Error loading memos. Please try again later.</p>'; // Display error to the user
         }
-    } catch (error) {
-        console.error('Error loading memos:', error);
     }
-}
-
 
     async function createOrUpdateMemo(memo, isUpdate = false) {
         try {
@@ -70,14 +68,12 @@ async function loadMemos() {
         memoText.textContent = memo.text;
         memoEntry.appendChild(memoText);
 
-        // Display formatted timestamp
         const memoTimestamp = document.createElement('div');
         memoTimestamp.className = 'memoTimestamp';
         const date = new Date(memo.timestamp);
-        memoTimestamp.textContent = date.toLocaleString(); // Formats date and time according to locale
+        memoTimestamp.textContent = date.toLocaleString();
         memoEntry.appendChild(memoTimestamp);
 
-        // Edit and Delete buttons with event listeners for each memo
         const editButton = document.createElement('button');
         editButton.textContent = 'Edit';
         editButton.onclick = () => {
