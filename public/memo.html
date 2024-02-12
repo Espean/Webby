@@ -8,38 +8,17 @@
     <link rel="stylesheet" href="../css/memo.css">
 </head>
 <body>
-GPT
-
-To ensure the burger menu is available on every page, you need to ensure that both index.html and memo.html (and any other HTML pages you have) include the burger menu markup in their <header> section. From the contents of index.html and memo.html, it appears that index.html already includes the required burger menu and navigation links:
-
-html
-
 <header>
     <div class="burger-menu">&#9776;</div> <!-- Burger icon -->
     <h1>Welcome to My Website</h1>
     <nav>
         <ul>
             <li><a href="/memo.html">Memos Page</a></li>
+            <li><a href="/index.html">Home Page</a></li>
             <!-- Add other navigation links here -->
         </ul>
     </nav>
 </header>
-
-However, the memo.html file's <header> section is commented out and does not include the burger menu or navigation links. To add the burger menu to the memo.html page, you should include the same <header> section as in index.html:
-
-html
-
-<header>
-    <div class="burger-menu">&#9776;</div> <!-- Burger icon -->
-    <h1>Welcome to My Website</h1>
-    <nav>
-        <ul>
-            <li><a href="/memo.html">Memos Page</a></li>
-            <!-- Add other navigation links here -->
-        </ul>
-    </nav>
-</header>
-r>
     <div id="memoBox">
         <textarea id="memoInput" placeholder="Enter your memo here..."></textarea>
         <button id="submit">Submit</button>
