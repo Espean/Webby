@@ -19,10 +19,8 @@ document.addEventListener('DOMContentLoaded', function () {
     async function loadMemos() {
         try {
             const response = await fetch(apiUrl);
-            // Ensure the response is not empty before attempting to parse it as JSON
             if (!response.ok) throw new Error('Failed to fetch memos');
-            const text = await response.text(); // Get response body as text
-            const memos = text ? JSON.parse(text) : []; // Parse text as JSON or use empty array if text is empty
+            const memos = await response.json(); // Directly use response.json()
             memoList.innerHTML = ''; // Clear existing memos before loading new ones
             memos.forEach(memo => createMemoEntry(memo));
         } catch (error) {
@@ -54,40 +52,31 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-function createMemoEntry(memo) {
-    const memoEntry = document.createElement('div');
-    memoEntry.className = 'memoEntry';
+    function createMemoEntry(memo) {
+        const memoEntry = document.createElement('div');
+        memoEntry.className = 'memoEntry';
 
-    const memoText = document.createElement('p');
-    memoText.className = 'memoText';
-    memoText.textContent = memo.text;
-    memoEntry.appendChild(memoText);
+        const memoText = document.createElement('p');
+        memoText.className = 'memoText';
+        memoText.textContent = memo.text;
+        memoEntry.appendChild(memoText);
 
-    // Display formatted timestamp
-    const memoTimestamp = document.createElement('div');
-    memoTimestamp.className = 'memoTimestamp';
-    const date = new Date(memo.timestamp); // Assuming memo.timestamp is in a compatible format
-    memoTimestamp.textContent = date.toLocaleString(); // Formats date and time according to locale
-    memoEntry.appendChild(memoTimestamp);
+        // Display formatted timestamp
+        const memoTimestamp = document.createElement('div');
+        memoTimestamp.className = 'memoTimestamp';
+        const date = new Date(memo.timestamp);
+        memoTimestamp.textContent = date.toLocaleString(); // Formats date and time according to locale
+        memoEntry.appendChild(memoTimestamp);
 
-    // Edit and Delete buttons with event listeners for each memo
-    const editButton = document.createElement('button');
-    editButton.textContent = 'Edit';
-    editButton.onclick = () => {
-        const newText = prompt('Edit memo:', memo.text);
-        if (newText) {
-            createOrUpdateMemo({ ...memo, text: newText }, true);
-        }
-    };
-    memoEntry.appendChild(editButton);
-
-    const deleteButton = document.createElement('button');
-    deleteButton.textContent = 'Delete';
-    deleteButton.onclick = () => deleteMemo(memo.id);
-    memoEntry.appendChild(deleteButton);
-
-    memoList.appendChild(memoEntry);
-};
+        // Edit and Delete buttons with event listeners for each memo
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.onclick = () => {
+            const newText = prompt('Edit memo:', memo.text);
+            if (newText) {
+                createOrUpdateMemo({ ...memo, text: newText }, true);
+            }
+        };
         memoEntry.appendChild(editButton);
 
         const deleteButton = document.createElement('button');
