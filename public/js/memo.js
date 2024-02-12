@@ -15,25 +15,27 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    async function loadMemos() {
-        try {
-            const response = await fetch(apiUrl);
-            if (response.ok) {
-                const text = await response.text();
-                const memos = text ? JSON.parse(text) : [];
-                memoList.innerHTML = ''; // Clear existing memos before loading new ones
-                memos.forEach(memo => createMemoEntry(memo));
-            } else if (response.status === 204) {
-                console.log('No memos to load.');
-                memoList.innerHTML = '<p>No memos found. Add some memos!</p>'; // Inform the user
-            } else {
-                throw new Error(`Failed to fetch memos, status: ${response.status}`);
-            }
-        } catch (error) {
-            console.error('Error loading memos:', error);
-            memoList.innerHTML = '<p>Error loading memos. Please try again later.</p>'; // Display error to the user
+async function loadMemos() {
+    try {
+        const response = await fetch(apiUrl);
+        if (response.ok) {
+            const text = await response.text();
+            const memos = text ? JSON.parse(text) : [];
+            console.log("Fetched memos:", memos); // Log fetched memos
+            memoList.innerHTML = ''; // Clear existing memos before loading new ones
+            memos.forEach(memo => createMemoEntry(memo));
+        } else if (response.status === 204) {
+            console.log('No memos to load.');
+            memoList.innerHTML = '<p>No memos found. Add some memos!</p>'; // Display message
+        } else {
+            throw new Error(`Failed to fetch memos, status: ${response.status}`);
         }
+    } catch (error) {
+        console.error('Error loading memos:', error);
+        memoList.innerHTML = '<p>Error loading memos. Please try again later.</p>'; // Display error
     }
+}
+
 
     async function createOrUpdateMemo(memo, isUpdate = false) {
         try {
