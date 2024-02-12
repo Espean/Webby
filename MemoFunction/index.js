@@ -32,22 +32,32 @@ module.exports = async function (context, req) {
 };
 
 async function getMemos(context, req) {
-    const listBlobs = containerClient.listBlobsFlat();
-    const memos = [];
-    for await (const blob of listBlobs) {
-        const blobClient = containerClient.getBlobClient(blob.name);
-        const downloadBlockBlobResponse = await blobClient.downloadToBuffer();
-        const blobContent = JSON.parse(downloadBlockBlobResponse.toString());
-        memos.push(blobContent); // Now pushing the blob's content instead of just name and URL
-    }
-    context.res = {
-        status: memos.length > 0 ? 200 : 204,
-        body: memos,
-        headers: {
-            'Content-Type': 'application/json'
+    try {
+        const listBlobs = containerClient.listBlobsFlat();
+        const memos = [];
+        for await (const blob of listBlobs) {
+            const blobClient = containerClient.getBlobClient(blob.name);
+            const downloadBlockBlobResponse = await blobClient.downloadToBuffer();
+            const blobContent = JSON.parse(downloadBlockBlobResponse.toString());
+            memos.push(blobContent); // Now pushing the blob's content instead of just name and URL
+            context.log(`Successfully fetched memo: ${blob.name}`);
         }
-    };
+        context.res = {
+            status: memos.length > 0 ? 200 : 204,
+            body: memos.length > 0 ? memos : "No memos found.",
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+    } catch (error) {
+        context.log.error(`Error fetching memos: ${error.message}`);
+        context.res = {
+            status: 500,
+            body: `Error fetching memos: ${error.message}`
+        };
+    }
 }
+
 
 async function createOrUpdateMemo(context, req, isUpdate = false) {
     const id = req.params.id || new Date().getTime().toString(); // Use timestamp as ID if not provided
