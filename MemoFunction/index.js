@@ -20,10 +20,8 @@ module.exports = async function (context, req) {
             await getMemos(context, req);
             break;
         case 'POST':
-            await createOrUpdateMemo(context, req);
-            break;
         case 'PUT':
-            await createOrUpdateMemo(context, req, true);
+            await createOrUpdateMemo(context, req, req.method === 'PUT');
             break;
         case 'DELETE':
             await deleteMemo(context, req);
@@ -45,11 +43,11 @@ async function getMemos(context, req) {
 async function createOrUpdateMemo(context, req, isUpdate = false) {
     const id = req.params.id || new Date().getTime().toString(); // Use timestamp as ID if not provided
     const content = req.body;
+    const contentString = JSON.stringify(content); // Correctly stringify the content object
     const blockBlobClient = containerClient.getBlockBlobClient(id + ".json");
-    await blockBlobClient.upload(Buffer.from(content), Buffer.byteLength(content), { overwrite: isUpdate });
+    await blockBlobClient.upload(Buffer.from(contentString), Buffer.byteLength(contentString), { overwrite: isUpdate });
     context.res = { status: 200, body: { message: "Memo saved successfully.", id: id } };
 }
-
 
 async function deleteMemo(context, req) {
     if (!req.params.id) {
