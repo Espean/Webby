@@ -35,19 +35,19 @@ async function getMemos(context, req) {
     const listBlobs = containerClient.listBlobsFlat();
     const memos = [];
     for await (const blob of listBlobs) {
-        // Assuming you might want to return more than just the name and URL in the future
-        memos.push({ name: blob.name, url: containerClient.getBlobClient(blob.name).url });
+        const blobClient = containerClient.getBlobClient(blob.name);
+        const downloadBlockBlobResponse = await blobClient.downloadToBuffer();
+        const blobContent = JSON.parse(downloadBlockBlobResponse.toString());
+        memos.push(blobContent); // Now pushing the content instead of just name and URL
     }
-    // Always return a JSON array, even if it's empty
     context.res = {
-        status: memos.length > 0 ? 200 : 204, // Consider using 200 OK for consistency and to always return JSON
-        body: memos.length > 0 ? memos : [],
+        status: memos.length > 0 ? 200 : 204,
+        body: memos,
         headers: {
             'Content-Type': 'application/json'
         }
     };
 }
-
 async function createOrUpdateMemo(context, req, isUpdate = false) {
     const id = req.params.id || new Date().getTime().toString(); // Use timestamp as ID if not provided
     let content = req.body;
