@@ -2,11 +2,11 @@ const { BlobServiceClient } = require('@azure/storage-blob');
 const { DefaultAzureCredential } = require('@azure/identity');
 const { SecretClient } = require('@azure/keyvault-secrets');
 
-const containerName = 'memos';
+const containerName = 'memos'; // The name of your Azure Blob Storage container
 let blobServiceClient, containerClient;
 
 module.exports = async function (context, req) {
-    const keyVaultName = process.env["webbykv"];
+    const keyVaultName = process.env["webbykv"]; // Your Azure Key Vault name
     const KVUri = `https://${keyVaultName}.vault.azure.net`;
     const credential = new DefaultAzureCredential();
     const client = new SecretClient(KVUri, credential);
@@ -38,7 +38,7 @@ async function getMemos(context, req) {
         const blobClient = containerClient.getBlobClient(blob.name);
         const downloadBlockBlobResponse = await blobClient.downloadToBuffer();
         const blobContent = JSON.parse(downloadBlockBlobResponse.toString());
-        memos.push(blobContent); // Now pushing the content instead of just name and URL
+        memos.push(blobContent); // Now pushing the blob's content instead of just name and URL
     }
     context.res = {
         status: memos.length > 0 ? 200 : 204,
@@ -48,19 +48,19 @@ async function getMemos(context, req) {
         }
     };
 }
+
 async function createOrUpdateMemo(context, req, isUpdate = false) {
     const id = req.params.id || new Date().getTime().toString(); // Use timestamp as ID if not provided
     let content = req.body;
 
-    // If creating a new memo, add the timestamp server-side for consistency
     if (!isUpdate) {
         content = {
             ...content,
-            timestamp: new Date().toISOString() // Add timestamp
+            timestamp: new Date().toISOString() // Add timestamp for new memos
         };
     }
 
-    const contentString = JSON.stringify(content); // Correctly stringify the content object with timestamp
+    const contentString = JSON.stringify(content);
     const blockBlobClient = containerClient.getBlockBlobClient(`${id}.json`);
     await blockBlobClient.upload(Buffer.from(contentString), Buffer.byteLength(contentString), { overwrite: isUpdate });
     context.res = { status: 200, body: { message: "Memo saved successfully.", id } };
@@ -71,7 +71,7 @@ async function deleteMemo(context, req) {
         context.res = { status: 400, body: "Memo ID required for deletion." };
         return;
     }
-    const blobClient = containerClient.getBlobClient(req.params.id + ".json");
+    const blobClient = containerClient.getBlobClient(`${req.params.id}.json`);
     await blobClient.delete();
     context.res = { status: 200, body: "Memo deleted successfully." };
 }
