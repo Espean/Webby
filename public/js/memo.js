@@ -16,17 +16,26 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    async function loadMemos() {
-        try {
-            const response = await fetch(apiUrl);
-            if (!response.ok) throw new Error('Failed to fetch memos');
-            const memos = await response.json(); // Directly use response.json()
+async function loadMemos() {
+    try {
+        const response = await fetch(apiUrl);
+        if (response.ok) {
+            // Check if the response has content before parsing it
+            const text = await response.text();
+            const memos = text ? JSON.parse(text) : [];
             memoList.innerHTML = ''; // Clear existing memos before loading new ones
             memos.forEach(memo => createMemoEntry(memo));
-        } catch (error) {
-            console.error('Error loading memos:', error);
+        } else if (response.status === 204) {
+            console.log('No memos to load.');
+            // Handle no content scenario
+        } else {
+            throw new Error(`Failed to fetch memos, status: ${response.status}`);
         }
+    } catch (error) {
+        console.error('Error loading memos:', error);
     }
+}
+
 
     async function createOrUpdateMemo(memo, isUpdate = false) {
         try {
