@@ -54,24 +54,40 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function createMemoEntry(memo) {
-        const memoEntry = document.createElement('div');
-        memoEntry.className = 'memoEntry';
+function createMemoEntry(memo) {
+    const memoEntry = document.createElement('div');
+    memoEntry.className = 'memoEntry';
 
-        const memoText = document.createElement('p');
-        memoText.className = 'memoText';
-        memoText.textContent = memo.text;
-        memoEntry.appendChild(memoText);
+    const memoText = document.createElement('p');
+    memoText.className = 'memoText';
+    memoText.textContent = memo.text;
+    memoEntry.appendChild(memoText);
 
-        // Edit and Delete buttons with event listeners for each memo
-        const editButton = document.createElement('button');
-        editButton.textContent = 'Edit';
-        editButton.onclick = () => {
-            const newText = prompt('Edit memo:', memo.text);
-            if (newText) {
-                createOrUpdateMemo({ ...memo, text: newText }, true);
-            }
-        };
+    // Display formatted timestamp
+    const memoTimestamp = document.createElement('div');
+    memoTimestamp.className = 'memoTimestamp';
+    const date = new Date(memo.timestamp); // Assuming memo.timestamp is in a compatible format
+    memoTimestamp.textContent = date.toLocaleString(); // Formats date and time according to locale
+    memoEntry.appendChild(memoTimestamp);
+
+    // Edit and Delete buttons with event listeners for each memo
+    const editButton = document.createElement('button');
+    editButton.textContent = 'Edit';
+    editButton.onclick = () => {
+        const newText = prompt('Edit memo:', memo.text);
+        if (newText) {
+            createOrUpdateMemo({ ...memo, text: newText }, true);
+        }
+    };
+    memoEntry.appendChild(editButton);
+
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'Delete';
+    deleteButton.onclick = () => deleteMemo(memo.id);
+    memoEntry.appendChild(deleteButton);
+
+    memoList.appendChild(memoEntry);
+};
         memoEntry.appendChild(editButton);
 
         const deleteButton = document.createElement('button');
