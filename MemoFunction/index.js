@@ -39,9 +39,10 @@ async function getMemos(context, req) {
             const blobClient = containerClient.getBlobClient(blob.name);
             const downloadBlockBlobResponse = await blobClient.downloadToBuffer();
             const blobContent = JSON.parse(downloadBlockBlobResponse.toString());
-            memos.push(blobContent); // Now pushing the blob's content instead of just name and URL
-            context.log(`Successfully fetched memo: ${blob.name}`);
+            memos.push(blobContent);
+            context.log(`Memo content: ${JSON.stringify(blobContent)}`); // Additional logging
         }
+        context.log(`Total memos fetched: ${memos.length}`); // Log total number of memos
         context.res = {
             status: memos.length > 0 ? 200 : 204,
             body: memos.length > 0 ? memos : "No memos found.",
@@ -57,6 +58,7 @@ async function getMemos(context, req) {
         };
     }
 }
+
 
 
 async function createOrUpdateMemo(context, req, isUpdate = false) {
