@@ -83,11 +83,20 @@ async function createOrUpdateMemo(context, req, isUpdate = false) {
 }
 
 async function deleteMemo(context, req) {
-    if (!req.params.id) {
+    const memoId = req.params.id;
+    if (!memoId) {
         context.res = { status: 400, body: "Memo ID required for deletion." };
         return;
     }
-    const blobClient = containerClient.getBlobClient(`${req.params.id}.json`);
+
+    const blobName = `${memoId}.json`;
+    const blobClient = containerClient.getBlobClient(blobName);
+    const exists = await blobClient.exists();
+    if (!exists) {
+        context.res = { status: 404, body: "Memo not found." };
+        return;
+    }
+
     await blobClient.delete();
     context.res = { status: 200, body: "Memo deleted successfully." };
 }

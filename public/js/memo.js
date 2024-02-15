@@ -38,19 +38,21 @@ async function loadMemos() {
 }
 
 
-    async function createOrUpdateMemo(memo, isUpdate = false) {
-        try {
-            const response = await fetch(`${apiUrl}${isUpdate ? '/' + memo.id : ''}`, {
-                method: isUpdate ? 'PUT' : 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: memo.text })
-            });
-            if (!response.ok) throw new Error('Failed to save memo');
-            loadMemos(); // Reload memos to reflect changes
-        } catch (error) {
-            console.error('Error saving memo:', error);
-        }
+async function createOrUpdateMemo(memo, isUpdate = false) {
+    try {
+        const fetchOptions = {
+            method: isUpdate ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: memo.text })
+        };
+        const url = isUpdate ? `${apiUrl}/${memo.id}` : apiUrl;
+        const response = await fetch(url, fetchOptions);
+        if (!response.ok) throw new Error('Failed to save memo');
+        loadMemos(); // Reload memos to reflect changes
+    } catch (error) {
+        console.error('Error saving memo:', error);
     }
+}
 
     async function deleteMemo(id) {
         try {
@@ -82,7 +84,7 @@ async function loadMemos() {
         editButton.onclick = () => {
             const newText = prompt('Edit memo:', memo.text);
             if (newText) {
-                createOrUpdateMemo({ ...memo, text: newText }, true);
+                createOrUpdateMemo({ id: memo.id, text: newText }, true);
             }
         };
         memoEntry.appendChild(editButton);
