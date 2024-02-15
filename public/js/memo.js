@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 memos.forEach(blob => {
                     const memo = JSON.parse(blob); // Assuming each blob's content is a JSON string of memo data
                     createMemoEntry(memo);
+                    memo.id = blob.name
                 });
             } else {
                 console.log('Failed to load memos:', response.status);
