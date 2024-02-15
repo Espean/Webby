@@ -23,8 +23,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 memoList.innerHTML = ''; // Clear existing memos before loading new ones
                 memos.forEach(blob => {
                     const memo = JSON.parse(blob); // Assuming each blob's content is a JSON string of memo data
-                    createMemoEntry(memo);
                     memo.id = blob.name
+                    createMemoEntry(memo);
                 });
             } else {
                 console.log('Failed to load memos:', response.status);
