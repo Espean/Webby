@@ -38,32 +38,43 @@ async function loadMemos() {
 }
 
 
-async function createOrUpdateMemo(memo, isUpdate = false) {
+async function createOrUpdateMemo(memo, oldId = null) {
     try {
         const fetchOptions = {
-            method: isUpdate ? 'PUT' : 'POST',
+            method: 'POST', // Always use POST to create a new memo
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: memo.text, timestamp: new Date().toISOString() }) // Include the updated timestamp
+            body: JSON.stringify(memo)
         };
-        const url = isUpdate ? `${apiUrl}/${memo.id}` : apiUrl;
-        const response = await fetch(url, fetchOptions);
-        if (!response.ok) throw new Error(`Failed to ${isUpdate ? 'update' : 'create'} memo`);
+        const response = await fetch(apiUrl, fetchOptions);
+        if (!response.ok) throw new Error('Failed to create memo');
+
+        if (oldId) {
+            // If there's an old memo ID, delete the old memo after successfully creating a new one
+            await deleteMemo(oldId);
+        }
+
         loadMemos(); // Reload memos to reflect changes
     } catch (error) {
         console.error('Error saving memo:', error);
     }
 }
-
-    async function deleteMemo(id) {
-        try {
-            const response = await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
-            if (!response.ok) throw new Error('Failed to delete memo');
-            loadMemos(); // Reload memos to reflect changes
-        } catch (error) {
-            console.error('Error deleting memo:', error);
-        }
+editButton.onclick = () => {
+    const newText = prompt('Edit memo:', memo.text);
+    if (newText) {
+        const newMemo = { text: newText, timestamp: new Date().toISOString() }; // Create a new memo object
+        createOrUpdateMemo(newMemo, memo.id); // Pass the new memo object and the old memo's ID
     }
+}
 
+async function deleteMemo(id) {
+    try {
+        const response = await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error('Failed to delete memo');
+        loadMemos(); // Reload memos to reflect changes
+    } catch (error) {
+        console.error('Error deleting memo:', error);
+    }
+}
     function createMemoEntry(memo) {
         const memoEntry = document.createElement('div');
         memoEntry.className = 'memoEntry';
