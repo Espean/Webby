@@ -66,19 +66,24 @@ async function getMemos(context, req) {
 
 
 async function createOrUpdateMemo(context, req, isUpdate = false) {
-    const id = req.params.id || new Date().getTime().toString(); // Use timestamp as ID if not provided
-    let content = req.body;
+    const id = req.params.id || (isUpdate ? undefined : new Date().getTime().toString()); // Only generate a new ID if not updating
 
+    if (isUpdate && !id) {
+        context.res = { status: 400, body: "Memo ID required for update." };
+        return;
+    }
+
+    let content = req.body;
     if (!isUpdate) {
-        content = {
-            ...content,
-            timestamp: new Date().toISOString() // Add timestamp for new memos
-        };
+        content = { ...content, timestamp: new Date().toISOString() }; // Add timestamp for new memos
+    } else {
+        content.timestamp = new Date().toISOString(); // Update timestamp for edited memos
     }
 
     const contentString = JSON.stringify(content);
-    const blockBlobClient = containerClient.getBlockBlobClient(`${id}.json`);
-    await blockBlobClient.upload(Buffer.from(contentString), Buffer.byteLength(contentString), { overwrite: isUpdate });
+    const blobName = `${id}.json`;
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+    await blockBlobClient.upload(Buffer.from(contentString), Buffer.byteLength(contentString), { overwrite: true });
     context.res = { status: 200, body: { message: "Memo saved successfully.", id } };
 }
 

@@ -43,11 +43,11 @@ async function createOrUpdateMemo(memo, isUpdate = false) {
         const fetchOptions = {
             method: isUpdate ? 'PUT' : 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: memo.text })
+            body: JSON.stringify({ text: memo.text, timestamp: new Date().toISOString() }) // Include the updated timestamp
         };
         const url = isUpdate ? `${apiUrl}/${memo.id}` : apiUrl;
         const response = await fetch(url, fetchOptions);
-        if (!response.ok) throw new Error('Failed to save memo');
+        if (!response.ok) throw new Error(`Failed to ${isUpdate ? 'update' : 'create'} memo`);
         loadMemos(); // Reload memos to reflect changes
     } catch (error) {
         console.error('Error saving memo:', error);
@@ -84,7 +84,8 @@ async function createOrUpdateMemo(memo, isUpdate = false) {
         editButton.onclick = () => {
             const newText = prompt('Edit memo:', memo.text);
             if (newText) {
-                createOrUpdateMemo({ id: memo.id, text: newText }, true);
+                memo.text = newText; // Update the text of the memo
+                createOrUpdateMemo(memo, true); // Pass the entire memo object, including the ID
             }
         };
         memoEntry.appendChild(editButton);
