@@ -15,27 +15,25 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-async function loadMemos() {
-    try {
-        const response = await fetch(apiUrl);
-        console.log(response.status); // Log status code
-        if (response.ok) {
-            const text = await response.text();
-            const memos = text ? JSON.parse(text) : [];
-            console.log("Fetched memos:", memos); // Log fetched memos
-            memoList.innerHTML = ''; // Clear existing memos before loading new ones
-            memos.forEach(memo => createMemoEntry(memo));
-        } else if (response.status === 204) {
-            console.log('No memos to load.');
-            memoList.innerHTML = '<p>No memos found. Add some memos!</p>'; // Display message
-        } else {
-            throw new Error(`Failed to fetch memos, status: ${response.status}`);
+    async function loadMemos() {
+        try {
+            const response = await fetch(apiUrl);
+            if (response.ok) {
+                const memos = await response.json(); // Assuming the API returns JSON data
+                memoList.innerHTML = ''; // Clear existing memos before loading new ones
+                memos.forEach(blob => {
+                    const memo = JSON.parse(blob); // Assuming each blob's content is a JSON string of memo data
+                    createMemoEntry(memo);
+                });
+            } else {
+                console.log('Failed to load memos:', response.status);
+                memoList.innerHTML = '<p>Error loading memos.</p>';
+            }
+        } catch (error) {
+            console.error('Error loading memos:', error);
+            memoList.innerHTML = '<p>Error loading memos.</p>';
         }
-    } catch (error) {
-        console.error('Error loading memos:', error);
-        memoList.innerHTML = '<p>Error loading memos. Please try again later.</p>'; // Display error
     }
-}
 
 
 async function createOrUpdateMemo(memo, oldId = null) {
@@ -68,7 +66,6 @@ editButton.onclick = () => {
 
 async function deleteMemo(id) {
     try {
-        console.log.id
         const response = await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
         if (!response.ok) throw new Error('Failed to delete memo');
         loadMemos(); // Reload memos to reflect changes
