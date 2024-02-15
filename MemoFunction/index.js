@@ -81,7 +81,7 @@ async function createOrUpdateMemo(context, req, isUpdate = false) {
     }
 
     const contentString = JSON.stringify(content);
-    const blobName = `${id}.json`;
+    const blobName = `${id}`;
     const blockBlobClient = containerClient.getBlockBlobClient(blobName);
     await blockBlobClient.upload(Buffer.from(contentString), Buffer.byteLength(contentString), { overwrite: true });
     context.res = { status: 200, body: { message: "Memo saved successfully.", id } };

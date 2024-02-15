@@ -68,6 +68,7 @@ editButton.onclick = () => {
 
 async function deleteMemo(id) {
     try {
+        console.log.id
         const response = await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
         if (!response.ok) throw new Error('Failed to delete memo');
         loadMemos(); // Reload memos to reflect changes
