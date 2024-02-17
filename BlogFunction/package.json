@@ -1,0 +1,19 @@
+{
+  "name": "azure-functions-blogg",
+  "version": "1.0.0",
+  "description": "Azure Function for handling blog operations.",
+  "main": "index.js",
+  "scripts": {
+    "start": "func start",
+    "test": "echo \"No tests yet\""
+  },
+  "dependencies": {
+    "@azure/identity": "^1.5.2",
+    "@azure/keyvault-secrets": "^4.3.0",
+    "@azure/storage-blob": "^12.8.0",
+    "pg": "^8.5.1",
+    "express": "^4.17.1",
+    "multer": "^1.4.2",
+    "formidable": "^1.2.2"
+  }
+}
