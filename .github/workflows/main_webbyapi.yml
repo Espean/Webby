@@ -8,6 +8,7 @@ on:
       - 'AzureFunction/**'
       - 'NewFunction/**'
       - 'MemoFunction/**'
+      - 'BloggFunction/**'
   workflow_dispatch:
 
 jobs:
