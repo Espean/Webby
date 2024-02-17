@@ -15,55 +15,51 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    async function loadMemos() {
-        try {
-            const response = await fetch(apiUrl);
-            if (response.ok) {
-                const memos = await response.json(); // Assuming the API returns JSON data
-                memoList.innerHTML = ''; // Clear existing memos before loading new ones
-                memos.forEach(blob => {
-                    const memo = JSON.parse(blob); // Assuming each blob's content is a JSON string of memo data
-                    memo.id = blob.name
-                    createMemoEntry(memo);
-                });
-            } else {
-                console.log('Failed to load memos:', response.status);
-                memoList.innerHTML = '<p>Error loading memos.</p>';
-            }
-        } catch (error) {
-            console.error('Error loading memos:', error);
-            memoList.innerHTML = '<p>Error loading memos.</p>';
-        }
-    }
-
-
-async function createOrUpdateMemo(memo, oldId = null) {
+async function loadMemos() {
     try {
-        const fetchOptions = {
-            method: 'POST', // Always use POST to create a new memo
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(memo)
-        };
-        const response = await fetch(apiUrl, fetchOptions);
-        if (!response.ok) throw new Error('Failed to create memo');
-
-        if (oldId) {
-            // If there's an old memo ID, delete the old memo after successfully creating a new one
-            await deleteMemo(oldId);
+        const response = await fetch(apiUrl);
+        if (response.ok) {
+            const memos = await response.json(); // Assuming the response is already in JSON format
+            memoList.innerHTML = ''; // Clear existing memos before loading new ones
+            memos.forEach(memo => {
+                createMemoEntry(memo);
+            });
+        } else if (response.status === 204) {
+            memoList.innerHTML = '<p>No memos found. Add some memos!</p>'; // Display message if no memos
+        } else {
+            throw new Error(`Failed to fetch memos, status: ${response.status}`);
         }
-
-        loadMemos(); // Reload memos to reflect changes
     } catch (error) {
-        console.error('Error saving memo:', error);
+        console.error('Error loading memos:', error);
+        memoList.innerHTML = '<p>Error loading memos. Please try again later.</p>'; // Display error message
     }
 }
-editButton.onclick = () => {
-    const newText = prompt('Edit memo:', memo.text);
-    if (newText) {
-        const newMemo = { text: newText, timestamp: new Date().toISOString() }; // Create a new memo object
-        createOrUpdateMemo(newMemo, memo.id); // Pass the new memo object and the old memo's ID
-    }
+
+function createMemoEntry(memo) {
+    const memoEntry = document.createElement('div');
+    memoEntry.className = 'memoEntry';
+
+    const memoText = document.createElement('p');
+    memoText.className = 'memoText';
+    memoText.textContent = memo.text; // Display memo text
+    memoEntry.appendChild(memoText);
+
+    const memoId = document.createElement('div');
+    memoId.className = 'memoId';
+    memoId.textContent = `ID: ${memo.id}`; // Display memo ID
+    memoEntry.appendChild(memoId);
+
+    const memoTimestamp = document.createElement('div');
+    memoTimestamp.className = 'memoTimestamp';
+    const date = new Date(memo.timestamp);
+    memoTimestamp.textContent = date.toLocaleString();
+    memoEntry.appendChild(memoTimestamp);
+
+    // Add other elements like edit and delete buttons here
+
+    memoList.appendChild(memoEntry);
 }
+
 
 async function deleteMemo(id) {
     try {
