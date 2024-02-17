@@ -70,9 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
         memoText.textContent = memo.text; // Display memo text
         memoEntry.appendChild(memoText);
 
-        const memoId = document.createElement('div');
-        memoId.className = 'memoId';
-        memoId.textContent = `ID: ${memo.id}`; // Display memo ID
+        const memoId;
         memoEntry.appendChild(memoId);
 
         const memoTimestamp = document.createElement('div');
