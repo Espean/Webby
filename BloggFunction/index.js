@@ -5,7 +5,7 @@ const { Pool } = require('pg');
 const formidable = require('formidable-serverless');
 
 // Setup Key Vault for accessing secrets
-const keyVaultName = process.env["KEY_VAULT_NAME"];
+const keyVaultName = process.env["webbykv"]; // Your Azure Key Vault name
 const KVUri = `https://${keyVaultName}.vault.azure.net`;
 
 // Initialize PostgreSQL connection
