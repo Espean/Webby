@@ -14,6 +14,9 @@ app.get('/memo', function(req, res) {
     res.sendFile(path.join(__dirname + '/memo.html'));
 });
 
+app.get('/memo', function(req, res) {
+    res.sendFile(path.join(__dirname + '/blogg.html'));
+});
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
