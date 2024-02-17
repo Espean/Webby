@@ -38,13 +38,15 @@ async function getMemos(context, req) {
         for await (const blob of listBlobs) {
             const blobClient = containerClient.getBlobClient(blob.name);
             const downloadBlockBlobResponse = await blobClient.downloadToBuffer();
-            const blobContent = JSON.parse(downloadBlockBlobResponse.toString());
-            memos.push(blobContent); // Now pushing the blob's content instead of just name and URL
+            let blobContent = JSON.parse(downloadBlockBlobResponse.toString());
+            const id = blob.name.replace('.json', ''); // Extract ID from blob name
+            blobContent = { ...blobContent, id }; // Include the ID in the blob content
+            memos.push(blobContent);
             context.log(`Successfully fetched memo: ${blob.name}`);
         }
         // Additional logging to inspect the content right before sending the response
         context.log(`Final memos content before sending: ${JSON.stringify(memos)}`);
-        context.log(`Total memos fetched: ${memos.length}`); // Log total number of memos
+        context.log(`Total memos fetched: ${memos.length}`);
 
         context.res = {
             status: memos.length > 0 ? 200 : 204,
@@ -61,6 +63,7 @@ async function getMemos(context, req) {
         };
     }
 }
+
 
 
 
