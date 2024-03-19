@@ -1,0 +1,20 @@
+# Node modules - Dependency directories
+node_modules/
+
+# Terraform directories and files to ignore
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfplan
+*.tfschema
+*.tfbackup
+
+# Local .terraform directories
+**/.terraform/*
+
+# Ignore environment-specific files that may contain sensitive data
+*.tfvars.json
+
+# Ignore the binaries downloaded by Terraform
+**/terraform-provider-*
