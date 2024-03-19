@@ -32,7 +32,7 @@ jobs:
 
       - name: Terraform Apply
         run: |
-          cd terraform/production
+          cd terraform/prod
           terraform apply -auto-approve
         env:
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
